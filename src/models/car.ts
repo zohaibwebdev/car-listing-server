@@ -1,19 +1,19 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import  { Document, Schema, model } from 'mongoose';
+import { z } from 'zod';
 
-// Define the ICar interface extending from Document
-export interface ICar extends Document {
-  make: string;
-  carModel: string;
-  year: number;
-}
+export const CarSchema = z.object({
+  make: z.string().min(1, { message: 'Make is required' }),
+  carModel: z.string().min(1, { message: 'Car model is required' }),
+  year: z.number().int().positive().max(new Date().getFullYear(), { message: 'Year must be a valid year' }),
+});
 
-// Define the Car schema
-const CarSchema: Schema<ICar> = new Schema({
+export type CarType = z.infer<typeof CarSchema>;
+
+const carMongooseSchema = new Schema<CarType & Document>({
   make: { type: String, required: true },
   carModel: { type: String, required: true },
   year: { type: Number, required: true },
 });
 
-// Create and export the Car model
-const Car: Model<ICar> = mongoose.model<ICar>('Car', CarSchema);
+const Car = model<CarType & Document>('Car', carMongooseSchema);
 export default Car;
